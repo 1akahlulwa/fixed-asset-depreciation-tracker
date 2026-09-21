@@ -5,7 +5,7 @@ assets_df = pd.read_csv('assets.csv')
 
 assets_df['Annual_Depreciation'] = (assets_df['Purchase_Cost'] - assets_df['Salvage_Value'])/assets_df['Useful_Life']
 
-print(assets_df)
+#print(assets_df)
 
 #print(max((assets_df['Useful_Life'])))
 
@@ -18,11 +18,11 @@ def straight_line(cost, salvage, useful_life):
     bv_schedule = []
     depr_schedule = []
     for year in range(0,useful_life+1):
-        bv_schedule.append(cost)
-        depr_schedule.append(depr_amount)
-        cost =- depr_amount
-    schedule.append(round(bv_schedule,2))
-    schedule.append(round(depr_schedule,2))
+        bv_schedule.append(round(cost,2))
+        depr_schedule.append(round(depr_amount,2))
+        cost -= depr_amount
+    schedule.append(bv_schedule)
+    schedule.append(depr_schedule)
     return schedule
 
 
@@ -51,7 +51,10 @@ def reducing_balance_schedule(cost, salvage, useful_life):
 Year = []
 bv_schedule_table = [{'Year':Year}] #book value for compound method
 depr_schedule_table = [{'Year':Year}] #depr amounts for compound method
+bv_str_line = [{'Year':Year}]
+depr_str_line = [{'Year':Year}]
 iter = 0
+
 
 
 for row in assets_df.itertuples():
@@ -65,6 +68,14 @@ for row in assets_df.itertuples():
         Year.append(int(iter+1))
     else:
         Year.append(int(iter))
+
+    bv_str_line.append({
+        row.Asset_Name: straight_line(row.Purchase_Cost, row.Salvage_Value, row.Useful_Life)[0]
+    })
+    depr_str_line.append({
+            row.Asset_Name: straight_line(row.Purchase_Cost, row.Salvage_Value, row.Useful_Life)[1]
+        })
+    
     bv_schedule_table.append({
         row.Asset_Name: reducing_balance_schedule(row.Purchase_Cost, row.Salvage_Value, row.Useful_Life)[0]
     })
@@ -77,8 +88,11 @@ for row in assets_df.itertuples():
 #The tables as a DF
 bv_schedule_table = pd.concat([pd.DataFrame(d) for d in bv_schedule_table], axis=1)
 depr_schedule_table = pd.concat([pd.DataFrame(d) for d in depr_schedule_table], axis=1)
+str_table = pd.concat([pd.DataFrame(d) for d in bv_str_line], axis=1)
+depr_str_table = pd.concat([pd.DataFrame(d) for d in depr_str_line], axis=1)
 
-
+print(str_table)
+print(depr_str_table)
 print()
 print(bv_schedule_table)
 print(depr_schedule_table)
