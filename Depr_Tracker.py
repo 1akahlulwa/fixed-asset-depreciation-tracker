@@ -11,6 +11,22 @@ print(assets_df)
 
 assets_df = assets_df.reset_index() #matches indices with number of rows
 
+def straight_line(cost, salvage, useful_life):
+    schedule = []
+    depr_amount = (cost - salvage)/useful_life
+    years = []
+    bv_schedule = []
+    depr_schedule = []
+    for year in range(0,useful_life+1):
+        bv_schedule.append(cost)
+        depr_schedule.append(depr_amount)
+        cost =- depr_amount
+    schedule.append(round(bv_schedule,2))
+    schedule.append(round(depr_schedule,2))
+    return schedule
+
+
+
 
 def reducing_balance_schedule(cost, salvage, useful_life):
     rate = 1 - (salvage/cost)**(1/useful_life)
@@ -19,11 +35,12 @@ def reducing_balance_schedule(cost, salvage, useful_life):
     bv_schedule = [] #book value schedule
     depr_schedule = [] #depreciation schedule
     book_value = cost
-    for year in range(1, useful_life + 1):
-        depreciation = book_value * rate
-        book_value -= depreciation
+    for year in range(0, useful_life + 1):
         bv_schedule.append(round(book_value, 2))
+        depreciation = book_value * rate
         depr_schedule.append(round(depreciation, 2))
+        book_value -= depreciation
+        
 
     schedule.append(bv_schedule)
     schedule.append(depr_schedule)
@@ -34,14 +51,20 @@ def reducing_balance_schedule(cost, salvage, useful_life):
 Year = []
 bv_schedule_table = [{'Year':Year}] #book value for compound method
 depr_schedule_table = [{'Year':Year}] #depr amounts for compound method
-iter = 1
+iter = 0
 
 
 for row in assets_df.itertuples():
     #appends the schedule tables with the data from what the function returns
     #itertuples() iterates through the DF row by row and returns them as a tuple, quick and not heavy on the memory
+    if iter == 0:
 
-    Year.append(iter)
+        Year.append(int(iter))
+    elif iter == 9:
+        Year.append(int(iter))
+        Year.append(int(iter+1))
+    else:
+        Year.append(int(iter))
     bv_schedule_table.append({
         row.Asset_Name: reducing_balance_schedule(row.Purchase_Cost, row.Salvage_Value, row.Useful_Life)[0]
     })
